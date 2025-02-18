@@ -1,10 +1,10 @@
 "use client";
 // @flow strict
 import { isValidEmail } from "@/utils/check-email";
-import axios from "axios";
 import { useState } from "react";
 import { TbMailForward } from "react-icons/tb";
 import { toast } from "react-toastify";
+import emailjs from "emailjs-com";
 
 function ContactForm() {
   const [error, setError] = useState({ email: false, required: false });
@@ -15,11 +15,6 @@ function ContactForm() {
     message: "",
   });
 
-  const checkRequired = () => {
-    if (userInput.email && userInput.message && userInput.name) {
-      setError({ ...error, required: false });
-    }
-  };
 
   const handleSendMail = async (e) => {
     e.preventDefault();
@@ -31,30 +26,47 @@ function ContactForm() {
       return;
     } else {
       setError({ ...error, required: false });
-    };
+    }
 
     try {
       setIsLoading(true);
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/contact`,
-        userInput
+
+      // Send email via EmailJS
+      const response = await emailjs.send(
+        "service_33c5duh",
+        "template_25hm1le",
+        {
+          name: userInput.name,
+          email: userInput.email,
+          message: userInput.message,
+        },
+        "D5NtC7f8w0W_atjE0"
       );
 
-      toast.success("Message sent successfully!");
-      setUserInput({
-        name: "",
-        email: "",
-        message: "",
-      });
+      if (response.status === 200) {
+        toast.success("Message sent successfully!");
+        setUserInput({
+          name: "",
+          email: "",
+          message: "",
+        });
+      }
     } catch (error) {
-      toast.error(error?.response?.data?.message);
+      console.error("Email send error:", error);
+      toast.error("Failed to send message. Please try again.");
     } finally {
       setIsLoading(false);
-    };
+    }
+  };
+
+  const checkRequired = () => {
+    if (userInput.email && userInput.message && userInput.name) {
+      setError({ ...error, required: false });
+    }
   };
 
   return (
-    <div>
+    <form id="contact-form"><div>
       <p className="font-medium mb-5 text-[#16f2b3] text-xl uppercase">Contact with me</p>
       <div className="max-w-3xl text-white rounded-lg border border-[#464c6a] p-3 lg:p-5">
         <p className="text-sm text-[#d3d8e8]">{"If you have any questions or concerns, please don't hesitate to contact me. I am open to any work opportunities that align with my skills and interests."}</p>
@@ -114,17 +126,19 @@ function ContactForm() {
             >
               {
                 isLoading ?
-                <span>Sending Message...</span>:
-                <span className="flex items-center gap-1">
-                  Send Message
-                  <TbMailForward size={20} />
-                </span>
+                  <span>Sending Message...</span> :
+                  <span className="flex items-center gap-1">
+                    Send Message
+                    <TbMailForward size={20} />
+                  </span>
               }
             </button>
           </div>
         </div>
       </div>
     </div>
+    </form>
+
   );
 };
 
