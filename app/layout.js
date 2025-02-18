@@ -26,6 +26,7 @@ export default function RootLayout({ children }) {
       <head>
         {/* Google Tag Manager Script */}
         <Script
+          id="google-tag-manager"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
