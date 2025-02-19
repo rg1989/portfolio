@@ -4,7 +4,7 @@ import { isValidEmail } from "@/utils/check-email";
 import { useState } from "react";
 import { TbMailForward } from "react-icons/tb";
 import { toast } from "react-toastify";
-import emailjs from "emailjs-com";
+import emailjs from "@emailjs/browser";
 
 function ContactForm() {
   const [error, setError] = useState({ email: false, required: false });
