@@ -67,8 +67,8 @@ function HeroSection() {
             <Link
               className="flex items-center gap-1 hover:gap-3 rounded-full bg-gradient-to-r from-pink-500 to-violet-600 px-3 md:px-8 py-3 md:py-4 text-center text-xs md:text-sm font-medium uppercase tracking-wider text-white no-underline transition-all duration-200 ease-out hover:text-white hover:no-underline md:font-semibold"
               role="button"
-              target="_blank"
-              href={personalData.resume}
+              href="/CV_Roman_Grinevich.docx"
+              download="CV_Roman_Grinevich.docx" // Ensures the file downloads instead of opening
             >
               <span>Get Resume</span>
               <MdDownload size={16} />
@@ -133,6 +133,18 @@ function HeroSection() {
               <div>
                 <span className="ml-4 lg:ml-8 mr-2 text-white">
                   quickLearner:
+                </span>
+                <span className="text-orange-400">true</span>
+                <span className="text-gray-400">,</span>
+              </div>
+              <div>
+                <span className="ml-4 lg:ml-8 mr-2 text-white">adaptable:</span>
+                <span className="text-orange-400">true</span>
+                <span className="text-gray-400">,</span>
+              </div>
+              <div>
+                <span className="ml-4 lg:ml-8 mr-2 text-white">
+                  teamPlayer:
                 </span>
                 <span className="text-orange-400">true</span>
                 <span className="text-gray-400">,</span>
