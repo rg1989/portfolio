@@ -138,6 +138,18 @@ function HeroSection() {
                 <span className="text-gray-400">,</span>
               </div>
               <div>
+                <span className="ml-4 lg:ml-8 mr-2 text-white">adaptable:</span>
+                <span className="text-orange-400">true</span>
+                <span className="text-gray-400">,</span>
+              </div>
+              <div>
+                <span className="ml-4 lg:ml-8 mr-2 text-white">
+                  teamPlayer:
+                </span>
+                <span className="text-orange-400">true</span>
+                <span className="text-gray-400">,</span>
+              </div>
+              <div>
                 <span className="ml-4 lg:ml-8 mr-2 text-white">
                   problemSolver:
                 </span>
