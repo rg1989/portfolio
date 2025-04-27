@@ -18,6 +18,16 @@ function Navbar() {
           <li>
             <Link
               className="block px-4 py-2 no-underline outline-none hover:no-underline"
+              href="https://dashboard-git-dev-rg1989s-projects.vercel.app/login"
+            >
+              <div className="text-sm text-blue-400 font-bold transition-colors duration-300 hover:text-pink-600">
+                DASHBOARD
+              </div>
+            </Link>
+          </li>
+          <li>
+            <Link
+              className="block px-4 py-2 no-underline outline-none hover:no-underline"
               href="/#about"
             >
               <div className="text-sm text-white transition-colors duration-300 hover:text-pink-600">
