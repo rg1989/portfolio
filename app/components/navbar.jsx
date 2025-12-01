@@ -30,7 +30,7 @@ function Navbar() {
               className="block px-4 py-2 no-underline outline-none hover:no-underline"
               href="https://cheatsheet.grinevich.cc"
             >
-              <div className="text-sm text-blue-400 font-bold transition-colors duration-300 hover:text-pink-600">
+              <div className="text-sm text-red-400 font-bold transition-colors duration-300 hover:text-pink-600">
                 CHEAT SHEET
               </div>
             </Link>
