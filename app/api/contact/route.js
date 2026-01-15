@@ -1,6 +1,11 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import DOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
+
+const window = new JSDOM('').window;
+const purify = DOMPurify(window);
 
 // Create and configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -71,6 +76,12 @@ export async function POST(request) {
   try {
     const payload = await request.json();
     const { name, email, message: userMessage } = payload;
+
+    // Sanitize user input
+    const sanitizedName = purify.sanitize(name);
+    const sanitizedEmail = purify.sanitize(email);
+    const sanitizedMessage = purify.sanitize(userMessage);
+
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chat_id = process.env.TELEGRAM_CHAT_ID;
 
@@ -82,13 +93,16 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const message = `New message from ${name}\n\nEmail: ${email}\n\nMessage:\n\n${userMessage}\n\n`;
+    const message = `New message from ${sanitizedName}\n\nEmail: ${sanitizedEmail}\n\nMessage:\n\n${sanitizedMessage}\n\n`;
 
     // Send Telegram message
     const telegramSuccess = await sendTelegramMessage(token, chat_id, message);
 
     // Send email
-    const emailSuccess = await sendEmail(payload, message);
+    const emailSuccess = await sendEmail(
+      { name: sanitizedName, email: sanitizedEmail, message: sanitizedMessage },
+      message
+    );
 
     if (telegramSuccess && emailSuccess) {
       return NextResponse.json({
