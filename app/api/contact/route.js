@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import sanitize from '../../../utils/sanitizer.js';
 
 // Create and configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -47,15 +48,16 @@ const generateEmailTemplate = (name, email, userMessage) => `
 
 // Helper function to send an email via Nodemailer
 async function sendEmail(payload, message) {
-  const { name, email, message: userMessage } = payload;
+  // Use sanitized name, email, and message for display, but keep original for 'replyTo'
+  const { name, email, message: userMessage, originalEmail } = payload;
   
   const mailOptions = {
     from: "Portfolio", 
     to: process.env.EMAIL_ADDRESS, 
     subject: `New Message From ${name}`, 
-    text: message, 
+    text: message,
     html: generateEmailTemplate(name, email, userMessage), 
-    replyTo: email, 
+    replyTo: originalEmail, // Use the original email to ensure functionality
   };
   
   try {
@@ -82,13 +84,26 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const message = `New message from ${name}\n\nEmail: ${email}\n\nMessage:\n\n${userMessage}\n\n`;
+    // Sanitize all user-provided input to prevent XSS.
+    const sanitizedName = sanitize(name);
+    const sanitizedEmail = sanitize(email);
+    const sanitizedUserMessage = sanitize(userMessage);
+
+    const message = `New message from ${sanitizedName}\n\nEmail: ${sanitizedEmail}\n\nMessage:\n\n${sanitizedUserMessage}\n\n`;
 
     // Send Telegram message
     const telegramSuccess = await sendTelegramMessage(token, chat_id, message);
 
+    // For email, use sanitized data for display, but original email for replyTo.
+    const emailPayload = {
+      name: sanitizedName,
+      email: sanitizedEmail,
+      message: sanitizedUserMessage,
+      originalEmail: email, // Pass original email for 'replyTo'
+    };
+
     // Send email
-    const emailSuccess = await sendEmail(payload, message);
+    const emailSuccess = await sendEmail(emailPayload, message);
 
     if (telegramSuccess && emailSuccess) {
       return NextResponse.json({
