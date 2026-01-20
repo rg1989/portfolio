@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { sanitizeData } from '../../../../utils/sanitizer';
 
 // Create and configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -46,7 +47,7 @@ const generateEmailTemplate = (name, email, userMessage) => `
 `;
 
 // Helper function to send an email via Nodemailer
-async function sendEmail(payload, message) {
+async function sendEmail(payload, message, replyToEmail) {
   const { name, email, message: userMessage } = payload;
   
   const mailOptions = {
@@ -55,7 +56,7 @@ async function sendEmail(payload, message) {
     subject: `New Message From ${name}`, 
     text: message, 
     html: generateEmailTemplate(name, email, userMessage), 
-    replyTo: email, 
+    replyTo: replyToEmail,
   };
   
   try {
@@ -71,6 +72,9 @@ export async function POST(request) {
   try {
     const payload = await request.json();
     const { name, email, message: userMessage } = payload;
+
+    // Sanitize all fields.
+    const sanitizedPayload = sanitizeData({ name, email, message: userMessage });
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chat_id = process.env.TELEGRAM_CHAT_ID;
 
@@ -82,13 +86,17 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const message = `New message from ${name}\n\nEmail: ${email}\n\nMessage:\n\n${userMessage}\n\n`;
+    const message = `New message from ${sanitizedPayload.name}\n\nEmail: ${sanitizedPayload.email}\n\nMessage:\n\n${sanitizedPayload.message}\n\n`;
 
     // Send Telegram message
     const telegramSuccess = await sendTelegramMessage(token, chat_id, message);
 
-    // Send email
-    const emailSuccess = await sendEmail(payload, message);
+    // Send email using the sanitized payload for the body, and the original email for 'replyTo'
+    const emailSuccess = await sendEmail(
+      sanitizedPayload,
+      message,
+      email
+    );
 
     if (telegramSuccess && emailSuccess) {
       return NextResponse.json({
