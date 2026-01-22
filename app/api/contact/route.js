@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import sanitize from '@/utils/sanitizer';
 
 // Create and configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -52,9 +53,9 @@ async function sendEmail(payload, message) {
   const mailOptions = {
     from: "Portfolio", 
     to: process.env.EMAIL_ADDRESS, 
-    subject: `New Message From ${name}`, 
+    subject: `New Message From ${sanitize(name)}`,
     text: message, 
-    html: generateEmailTemplate(name, email, userMessage), 
+    html: generateEmailTemplate(sanitize(name), sanitize(email), sanitize(userMessage)),
     replyTo: email, 
   };
   
