@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { sanitize } from '../../../utils/sanitizer';
 
 // Create and configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -52,9 +53,9 @@ async function sendEmail(payload, message) {
   const mailOptions = {
     from: "Portfolio", 
     to: process.env.EMAIL_ADDRESS, 
-    subject: `New Message From ${name}`, 
+    subject: `New Message From ${sanitize(name)}`,
     text: message, 
-    html: generateEmailTemplate(name, email, userMessage), 
+    html: generateEmailTemplate(sanitize(name), sanitize(email), sanitize(userMessage)),
     replyTo: email, 
   };
   
@@ -82,7 +83,7 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const message = `New message from ${name}\n\nEmail: ${email}\n\nMessage:\n\n${userMessage}\n\n`;
+    const message = `New message from ${sanitize(name)}\n\nEmail: ${sanitize(email)}\n\nMessage:\n\n${sanitize(userMessage)}\n\n`;
 
     // Send Telegram message
     const telegramSuccess = await sendTelegramMessage(token, chat_id, message);
