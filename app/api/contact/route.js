@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { sanitize } from '../../../utils/sanitizer';
 
 // Create and configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -34,11 +35,11 @@ const generateEmailTemplate = (name, email, userMessage) => `
   <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f4f4f4;">
     <div style="max-width: 600px; margin: auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
       <h2 style="color: #007BFF;">New Message Received</h2>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Name:</strong> ${sanitize(name)}</p>
+      <p><strong>Email:</strong> ${sanitize(email)}</p>
       <p><strong>Message:</strong></p>
       <blockquote style="border-left: 4px solid #007BFF; padding-left: 10px; margin-left: 0;">
-        ${userMessage}
+        ${sanitize(userMessage)}
       </blockquote>
       <p style="font-size: 12px; color: #888;">Click reply to respond to the sender.</p>
     </div>
@@ -52,7 +53,7 @@ async function sendEmail(payload, message) {
   const mailOptions = {
     from: "Portfolio", 
     to: process.env.EMAIL_ADDRESS, 
-    subject: `New Message From ${name}`, 
+    subject: `New Message From ${sanitize(name)}`,
     text: message, 
     html: generateEmailTemplate(name, email, userMessage), 
     replyTo: email, 
@@ -82,7 +83,7 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const message = `New message from ${name}\n\nEmail: ${email}\n\nMessage:\n\n${userMessage}\n\n`;
+    const message = `New message from ${sanitize(name)}\n\nEmail: ${sanitize(email)}\n\nMessage:\n\n${sanitize(userMessage)}\n\n`;
 
     // Send Telegram message
     const telegramSuccess = await sendTelegramMessage(token, chat_id, message);
