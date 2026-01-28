@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import sanitize from '../../../utils/sanitizer.js';
 
 // Create and configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -71,6 +72,11 @@ export async function POST(request) {
   try {
     const payload = await request.json();
     const { name, email, message: userMessage } = payload;
+
+    // Sanitize user inputs to prevent XSS
+    const sanitizedName = sanitize(name);
+    const sanitizedMessage = sanitize(userMessage);
+
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chat_id = process.env.TELEGRAM_CHAT_ID;
 
@@ -82,13 +88,20 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const message = `New message from ${name}\n\nEmail: ${email}\n\nMessage:\n\n${userMessage}\n\n`;
+    const message = `New message from ${sanitizedName}\n\nEmail: ${email}\n\nMessage:\n\n${sanitizedMessage}\n\n`;
+
+    // Create a sanitized payload for the email function, keeping original email for replyTo
+    const sanitizedPayload = {
+      name: sanitizedName,
+      email: email,
+      message: sanitizedMessage,
+    };
 
     // Send Telegram message
     const telegramSuccess = await sendTelegramMessage(token, chat_id, message);
 
-    // Send email
-    const emailSuccess = await sendEmail(payload, message);
+    // Send email with sanitized data
+    const emailSuccess = await sendEmail(sanitizedPayload, message);
 
     if (telegramSuccess && emailSuccess) {
       return NextResponse.json({
