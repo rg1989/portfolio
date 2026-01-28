@@ -1,0 +1,4 @@
+## 2024-08-05 - Stored XSS in Contact Form
+**Vulnerability:** User-provided input (`name`, `message`) was directly embedded into an HTML email template in `app/api/contact/route.js` without any sanitization.
+**Learning:** This allowed for a classic stored XSS attack. An attacker could submit malicious HTML, including `<script>` tags, which would execute in the email client of the portfolio owner. This highlights a failure to treat all user input as untrusted, especially when it's used to construct HTML.
+**Prevention:** All user-controlled data that is rendered into an HTML context must be sanitized. A simple, character-escaping sanitizer was introduced to neutralize this vector, and this practice should be applied to any similar functionality added in the future. Input validation should be the default, not an afterthought.
